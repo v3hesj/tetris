@@ -23,6 +23,9 @@
 </head>
 <body>
 <canvas width="320" height="640" id="game"></canvas>
+<canvas width="160" height="160" id="game1"></canvas>
+<canvas width="160" height="160" id="game2"></canvas>
+
 <script>
 // https://tetris.fandom.com/wiki/Tetris_Guideline
 
@@ -49,11 +52,16 @@ function generateSequence() {
 
 // get the next tetromino in the sequence
 function getNextTetromino() {
-  if (tetrominoSequence.length === 0) {
+  if (tetrominoSequence.length <= 1) {
     generateSequence();
   }
-
   const name = tetrominoSequence.pop();
+  //if (tetrominoSequence.length != 0)  {
+    name_next = tetrominoSequence[tetrominoSequence.length-1]
+    const matrix1 = tetrominos[name_next];
+    //console.log(name_next, "  ",matrix1)
+ // }
+  
   const matrix = tetrominos[name];
 
   // I and O start centered, all others start in left-middle
@@ -66,7 +74,9 @@ function getNextTetromino() {
     name: name,      // name of the piece (L, O, etc.)
     matrix: matrix,  // the current rotation matrix
     row: row,        // current row (starts offscreen)
-    col: col         // current col
+    col: col,         // current col
+    matrix1: matrix1,
+    name_next: name_next
   };
 }
 
@@ -132,9 +142,42 @@ function placeTetromino() {
       row--;
     }
   }
-  console.log(point_ch)
+  console.log(point_ch*100 +" points")
   fpsP(point_ch)
   tetromino = getNextTetromino();
+}
+
+//let win = []
+function inH(res) {
+  localStorage.setItem(point_ch*100,res)
+
+  //win.push(res)
+  //if (win.lengt>1) {
+ //   win.sort(function (a, b) {return a-b})
+//  }
+
+  console.log (res, "  ",point_ch*100)  
+  d_write()
+}
+let row_ = 0
+let win_m = [] 
+function d_write(){
+  let keys = Object.keys(localStorage);
+  for(let key of keys) {
+    //document.write(`${key}: ${localStorage.getItem(key)}`)
+    win_m[key] = localStorage.getItem(key)
+    console.log(`${key}: ${localStorage.getItem(key)}`);
+    row_ = row_+ 20
+    
+  context2.fillStyle = 'white';
+  context2.font = '14px serif';
+  context2.textAlign = 'center';
+  context2.textBaseline = 'middle';
+  context2.fillText(`${localStorage.getItem(key)}: ${key}`, canvas2.width/2, row_);
+  }
+
+
+
 }
 
 let fps = 35
@@ -156,7 +199,7 @@ function fpsP(point_ch){
         default: fps = 35
     }
 }
-
+let result
 // show the game over screen
 function showGameOver() {
   cancelAnimationFrame(rAF);
@@ -172,16 +215,28 @@ function showGameOver() {
   context.textAlign = 'center';
   context.textBaseline = 'middle';
   context.fillText('GAME OVER!', canvas.width / 2, canvas.height / 2);
+
+  result = prompt("ВВедите ваше имя")
+  if(result != null) {
+    inH(result)
+  }
+    
 }
 
 const canvas = document.getElementById('game');
 const context = canvas.getContext('2d');
+const canvas1 = document.getElementById('game1');
+const context1 = canvas1.getContext('2d');
+const canvas2 = document.getElementById('game2');
+const context2 = canvas2.getContext('2d');
 const grid = 32;
 const tetrominoSequence = [];
 
+console.log(tetrominoSequence)
 // keep track of what is in every cell of the game using a 2d array
 // tetris playfield is 10x20, with a few rows offscreen
 const playfield = [];
+const playfield1 = [];
 
 // populate the empty state
 for (let row = -2; row < 20; row++) {
@@ -191,7 +246,13 @@ for (let row = -2; row < 20; row++) {
     playfield[row][col] = 0;
   }
 }
+for (let row = 0; row < 4; row++) {
+  playfield1[row] = [];
 
+  for (let col = 0; col < 4; col++) {
+    playfield1[row][col] = 0;
+  }
+}
 // how to draw each tetromino
 // @see https://tetris.fandom.com/wiki/SRS
 const tetrominos = {
@@ -253,7 +314,8 @@ let gameOver = false;
 function loop() {
   rAF = requestAnimationFrame(loop);
   context.clearRect(0,0,canvas.width,canvas.height);
-
+  context1.clearRect(0,0,canvas1.width,canvas1.height);
+  
   // draw the playfield
   for (let row = 0; row < 20; row++) {
     for (let col = 0; col < 10; col++) {
@@ -283,6 +345,7 @@ function loop() {
     }
 
     context.fillStyle = colors[tetromino.name];
+    context1.fillStyle = colors[tetromino.name_next];
 
     for (let row = 0; row < tetromino.matrix.length; row++) {
       for (let col = 0; col < tetromino.matrix[row].length; col++) {
@@ -290,6 +353,15 @@ function loop() {
 
           // drawing 1 px smaller than the grid creates a grid effect
           context.fillRect((tetromino.col + col) * grid, (tetromino.row + row) * grid, grid-1, grid-1);
+        }
+      }
+    }
+    for (let i = 0; i < tetromino.matrix1.length; i++) {
+      for (let j = 0; j < tetromino.matrix1[i].length; j++) {
+        if (tetromino.matrix1[i][j]) {
+           // console.log(tetromino.matrix1)
+          // drawing 1 px smaller than the grid creates a grid effect
+          context1.fillRect((tetromino.matrix1[i][j]+j) * grid, (tetromino.matrix1[i][j]+i) * grid, grid-1, grid-1);
         }
       }
     }
