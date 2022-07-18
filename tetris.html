@@ -20,17 +20,76 @@
     border: 1px solid white;
   }
   </style>
+  <style>
+    table {
+        width:20%;
+    }
+    table, th, td {
+        border: 1px solid rgb(145, 145, 145);
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 15px;
+        text-align: left;
+    }
+    table#t01 tr:nth-child(even) {
+        background-color: rgb(88, 88, 88);
+    }
+    table#t01 tr:nth-child(odd) {
+       background-color: rgb(80, 80, 80);
+    }
+    table#t01 th {
+        background-color: black;
+        color: white;
+    }
+    </style>
 </head>
 <body>
 <canvas width="320" height="640" id="game"></canvas>
 <canvas width="160" height="160" id="game1"></canvas>
-<canvas width="160" height="160" id="game2"></canvas>
+
+
+<table id="t01">
+  <tr>
+    <th>Name</th>
+    <th>Point</th> 
+  </tr>
+  <tr>
+    <td id = "td01">name</td>
+    <td id = "td11">0</td>
+  </tr>
+  <tr>
+    <td id = "td02">name</td>
+    <td id = "td22">0</td>
+  </tr>
+  <tr>
+    <td id = "td03">name</td>
+    <td id = "td33">0</td>
+  </tr>
+  <tr>
+    <td id = "td04">name</td>
+    <td id = "td44">0</td>
+  </tr>
+  <tr>
+    <td id = "td05">name</td>
+    <td id = "td55">0</td>
+  </tr>
+</table>
+<!--
+<table id = "t02">
+  <tr>
+    <td>ddd</td>
+    <td>ttt</td>
+  </tr>
+</table>
+-->
 
 <script>
-// https://tetris.fandom.com/wiki/Tetris_Guideline
 
-// get a random integer between the range of [min,max]
-// @see https://stackoverflow.com/a/1527820/2124254
+
+
+
+
 function getRandomInt(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -142,42 +201,57 @@ function placeTetromino() {
       row--;
     }
   }
-  console.log(point_ch*100 +" points")
+  console.log(point_ch +" points")
   fpsP(point_ch)
   tetromino = getNextTetromino();
 }
 
-//let win = []
 function inH(res) {
-  localStorage.setItem(point_ch*100,res)
-
-  //win.push(res)
-  //if (win.lengt>1) {
- //   win.sort(function (a, b) {return a-b})
-//  }
-
-  console.log (res, "  ",point_ch*100)  
+  localStorage.setItem(res,point_ch)
+  console.log (res, "  ",point_ch)  
   d_write()
+
 }
-let row_ = 0
-let win_m = [] 
+
+//localStorage.clear()
+
+let tabId = {
+  'td01' : 'td11',
+  'td02' : 'td22',
+  'td03' : 'td33',
+  'td04' : 'td44',
+  'td05' : 'td55'
+}
+
+//let win_m = [] 
+//let win_k = []
+let indI = 0
+
+d_write()
+
 function d_write(){
-  let keys = Object.keys(localStorage);
-  for(let key of keys) {
-    //document.write(`${key}: ${localStorage.getItem(key)}`)
-    win_m[key] = localStorage.getItem(key)
-    console.log(`${key}: ${localStorage.getItem(key)}`);
-    row_ = row_+ 20
-    
-  context2.fillStyle = 'white';
-  context2.font = '14px serif';
-  context2.textAlign = 'center';
-  context2.textBaseline = 'middle';
-  context2.fillText(`${localStorage.getItem(key)}: ${key}`, canvas2.width/2, row_);
+  let sortObj = Object.entries(localStorage)
+  let sortObjNext = sortObj.sort((a, b) => Number(a[1]) > Number(b[1]) ? -1 : 1)
+  //console.log (sortObjNext)
+
+  indI = 0
+  let i = 0
+  for (let key of Object.keys(tabId)) {
+    let element = document.getElementById(key)
+    if(sortObjNext[i][0] != undefined) {
+        element.innerHTML = sortObjNext[i][0]
+    }
+    i++
   }
-
-
-
+  i = 0
+  for (let value of Object.values(tabId)) {
+    let elementV = document.getElementById(value)
+    if(sortObjNext[i][1] != undefined) {
+      elementV.innerHTML = sortObjNext[i][1]
+    }
+    i++
+  }
+  i = 0
 }
 
 let fps = 35
@@ -185,16 +259,25 @@ let fps = 35
 function fpsP(point_ch){
     switch (point_ch) {
         case 1: 
-            fps = 25
+            fps = 30
             break
         case 2:
-            fps = 15
+            fps = 25
             break
         case 3:
-            fps = 10
+            fps = 20
             break
         case 4:
-            fps = 5
+            fps = 15
+            break
+        case 5:
+            fps = 13
+            break
+        case 6:
+            fps = 11
+            break
+        case 7:
+            fps = 10
             break
         default: fps = 35
     }
@@ -227,12 +310,12 @@ const canvas = document.getElementById('game');
 const context = canvas.getContext('2d');
 const canvas1 = document.getElementById('game1');
 const context1 = canvas1.getContext('2d');
-const canvas2 = document.getElementById('game2');
-const context2 = canvas2.getContext('2d');
+//const canvas2 = document.getElementById('game2');
+//const context2 = canvas2.getContext('2d');
 const grid = 32;
 const tetrominoSequence = [];
 
-console.log(tetrominoSequence)
+//console.log(tetrominoSequence)
 // keep track of what is in every cell of the game using a 2d array
 // tetris playfield is 10x20, with a few rows offscreen
 const playfield = [];
