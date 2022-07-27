@@ -20,69 +20,38 @@
     border: 1px solid white;
   }
   </style>
-  <style>
-    table {
-        width:20%;
-    }
-    table, th, td {
-        border: 1px solid rgb(145, 145, 145);
-        border-collapse: collapse;
-    }
-    th, td {
-        padding: 15px;
-        text-align: left;
-    }
-    table#t01 tr:nth-child(even) {
-        background-color: rgb(88, 88, 88);
-    }
-    table#t01 tr:nth-child(odd) {
-       background-color: rgb(80, 80, 80);
-    }
-    table#t01 th {
-        background-color: black;
-        color: white;
-    }
-    </style>
+ 
+    <style>
+      table {
+          width:20%;
+      }
+      table, th, td {
+          border: 1px solid rgb(145, 145, 145);
+          border-collapse: collapse;
+      }
+      th, td {
+          padding: 15px;
+          text-align: left;
+      }
+      table#tableDidamic tr:nth-child(even) {
+          background-color: rgb(88, 88, 88);
+      }
+      table#tableDidamic tr:nth-child(odd) {
+         background-color: rgb(80, 80, 80);
+      }
+      table#tableDidamic th {
+          background-color: black;
+          color: white;
+      }
+      </style>
+      
 </head>
 <body>
 <canvas width="320" height="640" id="game"></canvas>
 <canvas width="160" height="160" id="game1"></canvas>
-
-
-<table id="t01">
-  <tr>
-    <th>Name</th>
-    <th>Point</th> 
-  </tr>
-  <tr>
-    <td id = "td01">name</td>
-    <td id = "td11">0</td>
-  </tr>
-  <tr>
-    <td id = "td02">name</td>
-    <td id = "td22">0</td>
-  </tr>
-  <tr>
-    <td id = "td03">name</td>
-    <td id = "td33">0</td>
-  </tr>
-  <tr>
-    <td id = "td04">name</td>
-    <td id = "td44">0</td>
-  </tr>
-  <tr>
-    <td id = "td05">name</td>
-    <td id = "td55">0</td>
-  </tr>
-</table>
-<!--
-<table id = "t02">
-  <tr>
-    <td>ddd</td>
-    <td>ttt</td>
-  </tr>
-</table>
--->
+<div id = "forTable">
+</div>
+<table id = "tableDidamic"></table>
 
 <script>
 
@@ -115,11 +84,9 @@ function getNextTetromino() {
     generateSequence();
   }
   const name = tetrominoSequence.pop();
-  //if (tetrominoSequence.length != 0)  {
-    name_next = tetrominoSequence[tetrominoSequence.length-1]
-    const matrix1 = tetrominos[name_next];
-    //console.log(name_next, "  ",matrix1)
- // }
+    nameNextFigure = tetrominoSequence[tetrominoSequence.length-1]
+    const matrixNextFigure = tetrominos[nameNextFigure];
+
   
   const matrix = tetrominos[name];
 
@@ -134,8 +101,8 @@ function getNextTetromino() {
     matrix: matrix,  // the current rotation matrix
     row: row,        // current row (starts offscreen)
     col: col,         // current col
-    matrix1: matrix1,
-    name_next: name_next
+    matrixNextFigure: matrixNextFigure,
+    nameNextFigure: nameNextFigure
   };
 }
 
@@ -207,51 +174,58 @@ function placeTetromino() {
 }
 
 function inH(res) {
-  localStorage.setItem(res,point_ch)
-  console.log (res, "  ",point_ch)  
-  d_write()
-
+  console.log (res, " набрал ",point_ch)  
 }
 
-//localStorage.clear()
-
-let tabId = {
-  'td01' : 'td11',
-  'td02' : 'td22',
-  'td03' : 'td33',
-  'td04' : 'td44',
-  'td05' : 'td55'
-}
-
-//let win_m = [] 
-//let win_k = []
 let indI = 0
+//localStorage.clear()
+creatTable(JSON.parse(localStorage.getItem('table')))
 
-d_write()
+function creatTable (obj) {
+    let table = document.createElement('table')
+    table.setAttribute("id", "tableDidamic");
+    document.getElementById('forTable').after(table)
+    let thead = document.createElement('thead');
+    let tbody = document.createElement('tbody');
 
-function d_write(){
-  let sortObj = Object.entries(localStorage)
-  let sortObjNext = sortObj.sort((a, b) => Number(a[1]) > Number(b[1]) ? -1 : 1)
-  //console.log (sortObjNext)
+    document.getElementById('tableDidamic').appendChild(thead);
+    document.getElementById('tableDidamic').appendChild(tbody);
+    
+    let tdTag = document.createElement('td')
+    thead.innerHTML = '<tr><th>Name</th><th>Point</th></tr>'
 
-  indI = 0
-  let i = 0
-  for (let key of Object.keys(tabId)) {
-    let element = document.getElementById(key)
-    if(sortObjNext[i][0] != undefined) {
-        element.innerHTML = sortObjNext[i][0]
+    let sortObj = Object.entries(obj)
+    let sortObjNext = sortObj.sort((a, b) => Number(a[1]) > Number(b[1]) ? -1 : 1)
+    console.log(obj,sortObjNext)
+    for (let i = 0; i < 5; i++) {
+      let trTag = document.createElement('tr')
+      for (let j = 0; j < 2; j++) {
+        let tdTag = document.createElement('td')
+        if(sortObjNext[i][j] != undefined) {
+          tdTag.innerHTML = sortObjNext[i][j]
+          trTag.appendChild(tdTag) 
+        }
+      }
+      tbody.appendChild(trTag)
     }
-    i++
-  }
-  i = 0
-  for (let value of Object.values(tabId)) {
-    let elementV = document.getElementById(value)
-    if(sortObjNext[i][1] != undefined) {
-      elementV.innerHTML = sortObjNext[i][1]
+}
+
+function jSetResult(res,point) {
+  if(res != 0 && point >= 0) {
+    if(localStorage['table']) {
+      let jSon = JSON.parse(localStorage.getItem('table'))
+      let jSonMap = new Map(Object.entries(jSon))
+      jSonMap.set(res,point)
+      localStorage.setItem('table',JSON.stringify(Object.fromEntries(jSonMap)))
+      //console.log("JSON",jSon,jSonMap)
+    } else {
+      let tableLeader = new Map()
+      tableLeader.set(res,point)
+      let tableLeaderObj = Object.fromEntries(tableLeader)
+      localStorage.setItem('table',JSON.stringify(tableLeaderObj))
     }
-    i++
+    creatTable (JSON.parse(localStorage.getItem('table')))
   }
-  i = 0
 }
 
 let fps = 35
@@ -302,6 +276,8 @@ function showGameOver() {
   result = prompt("ВВедите ваше имя")
   if(result != null) {
     inH(result)
+    document.getElementById('tableDidamic').remove()
+    jSetResult(result,point_ch)
   }
     
 }
@@ -319,7 +295,7 @@ const tetrominoSequence = [];
 // keep track of what is in every cell of the game using a 2d array
 // tetris playfield is 10x20, with a few rows offscreen
 const playfield = [];
-const playfield1 = [];
+const playfieldNextFigure = [];
 
 // populate the empty state
 for (let row = -2; row < 20; row++) {
@@ -330,10 +306,10 @@ for (let row = -2; row < 20; row++) {
   }
 }
 for (let row = 0; row < 4; row++) {
-  playfield1[row] = [];
+  playfieldNextFigure[row] = [];
 
   for (let col = 0; col < 4; col++) {
-    playfield1[row][col] = 0;
+    playfieldNextFigure[row][col] = 0;
   }
 }
 // how to draw each tetromino
@@ -428,7 +404,7 @@ function loop() {
     }
 
     context.fillStyle = colors[tetromino.name];
-    context1.fillStyle = colors[tetromino.name_next];
+    context1.fillStyle = colors[tetromino.nameNextFigure];
 
     for (let row = 0; row < tetromino.matrix.length; row++) {
       for (let col = 0; col < tetromino.matrix[row].length; col++) {
@@ -439,12 +415,12 @@ function loop() {
         }
       }
     }
-    for (let i = 0; i < tetromino.matrix1.length; i++) {
-      for (let j = 0; j < tetromino.matrix1[i].length; j++) {
-        if (tetromino.matrix1[i][j]) {
-           // console.log(tetromino.matrix1)
+    for (let i = 0; i < tetromino.matrixNextFigure.length; i++) {
+      for (let j = 0; j < tetromino.matrixNextFigure[i].length; j++) {
+        if (tetromino.matrixNextFigure[i][j]) {
+           // console.log(tetromino.matrixNextFigure)
           // drawing 1 px smaller than the grid creates a grid effect
-          context1.fillRect((tetromino.matrix1[i][j]+j) * grid, (tetromino.matrix1[i][j]+i) * grid, grid-1, grid-1);
+          context1.fillRect((tetromino.matrixNextFigure[i][j]+j) * grid, (tetromino.matrixNextFigure[i][j]+i) * grid, grid-1, grid-1);
         }
       }
     }
